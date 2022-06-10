@@ -7,6 +7,7 @@ and convert it to _Markdown_ and _HTML_.
 ## Example Usage
 
 ```sh
+./telegraph https://telegra.ph/Sample-Page-12-15
 ./telegraph --path Sample-Page-12-15 --json
 ./telegraph --path Sample-Page-12-15 --html
 ./telegraph --path Sample-Page-12-15 --markdown
@@ -21,6 +22,12 @@ If you download it as json, you can convert it later
 # will generate markdown and html
 ./telegraph --file sample-page-12-15.json
 ```
+
+## Installation
+
+- Install https://elixir-lang.org/install.html[Elixir >= 1.12]
+- `make deps`
+- `make build`
 
 ## 📘 License
 

@@ -3,12 +3,12 @@ defmodule Telegraph.CLI do
 
   @moduledoc """
 
-  Telegraph CLI v1.0.0
+  Telegraph CLI v1.0.1
 
   synopsis:
       Calls the Telegraph API.
   usage:
-      $ ./telegraph {options} arg1 arg2 ...
+      $ ./telegraph url|options arg1 arg2 ...
   options:
       --path         Specifies the path of the post.
       --file         Specifies a json to convert.
@@ -18,7 +18,22 @@ defmodule Telegraph.CLI do
   """
   def main(args) do
     Telegraph.init()
-    args |> parse |> run
+
+    argv = parse(args)
+    {options, items, _} = argv
+
+    # Is important that the path comes first
+    # since the pattern match would fail
+    # otherwise
+    options = case items do
+      items when is_list(items) -> cond do
+        # Extract the path from the url
+        Enum.count(items) > 0 -> [path: Telegraph.clean(Enum.at(items, 0))]
+        true -> []
+        end
+    end ++ options
+
+    run(options)
   end
 
   defp parse(args) do
@@ -99,26 +114,58 @@ defmodule Telegraph.CLI do
   end
 
   # MARK: - run
-  defp run({[path: path, json: true], _, _}) do
+  defp run(path: path, json: true) do
     json(path) |> save_json(path)
   end
 
-  defp run({[path: path, markdown: true], _, _}) do
+  defp run(path: path, markdown: true) do
     json(path) |> save_markdown(path)
   end
 
-  defp run({[path: path, html: true], _, _}) do
+  defp run(path: path, html: true) do
     json(path) |> save_html(path)
   end
 
-  defp run({[file: file], _, _}) do
+  defp run(path: path, json: true, html: true, markdown: true) do
+    data = json(path)
+    save_json(data, path)
+    save_markdown(data, path)
+    save_html(data, path)
+  end
+
+  defp run(path: path, json: true, html: true) do
+    data = json(path)
+    save_json(data, path)
+    save_html(data, path)
+  end
+
+  defp run(path: path, json: true, markdown: true) do
+    data = json(path)
+    save_json(data, path)
+    save_markdown(data, path)
+  end
+
+  defp run(path: path, html: true, markdown: true) do
+    data = json(path)
+    save_markdown(data, path)
+    save_html(data, path)
+  end
+
+  defp run(path: path) do
+    data = json(path)
+    save_json(data, path)
+    save_markdown(data, path)
+    save_html(data, path)
+  end
+
+  defp run(file: file) do
     data = read_file(file)
     path = Path.basename(file, ".json")
     save_markdown(data, path)
     save_html(data, path)
   end
 
-  defp run({[help: true], _, _}) do
+  defp run(help: true) do
     help()
   end
 
