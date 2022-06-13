@@ -3,7 +3,7 @@ defmodule Telegraph.CLI do
 
   @moduledoc """
 
-  Telegraph CLI v1.0.1
+  Telegraph CLI v1.0.2
 
   synopsis:
       Calls the Telegraph API.
@@ -22,6 +22,8 @@ defmodule Telegraph.CLI do
     argv = parse(args)
     {options, items, _} = argv
 
+    # Support the url as the first param
+    # to extract the path.
     # Is important that the path comes first
     # since the pattern match would fail
     # otherwise
@@ -87,30 +89,21 @@ defmodule Telegraph.CLI do
   end
 
   defp save_json(data, path) do
-    name = String.downcase(String.trim(path)) <> ".json"
-
-    case Jason.encode!(data) do
-      nil -> ""
-      content -> File.write(name, content, [:write, {:encoding, :utf8}])
-    end
+    name = "#{String.downcase(String.trim(path))}.json"
+    content = Jason.encode!(data)
+    File.write(name, content, [:write])
   end
 
   defp save_markdown(data, path) do
-    name = String.downcase(String.trim(path)) <> ".md"
-
-    case Telegraph.Util.Json2Markdown.to_markdown(data) do
-      nil -> ""
-      file -> File.write(name, file[:content], [:write, {:encoding, :utf8}])
-    end
+    name = "#{String.downcase(String.trim(path))}.md"
+    file = Telegraph.Util.Json2Markdown.to_markdown(data)
+    File.write(name, file[:content], [:write])
   end
 
   defp save_html(data, path) do
-    name = String.downcase(String.trim(path)) <> ".html"
-
-    case Telegraph.Util.Json2HTML.to_html(data) do
-      nil -> ""
-      file -> File.write(name, file[:content], [:write, {:encoding, :utf8}])
-    end
+    name = "#{String.downcase(String.trim(path))}.html"
+    file = Telegraph.Util.Json2HTML.to_html(data)
+    File.write(name, file[:content], [:write])
   end
 
   # MARK: - run
